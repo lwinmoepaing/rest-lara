@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 | Buyers
 |----------
 */
-Route::resource('buyer', 'Buyer\BuyerController')->only(['index', 'show']);
+Route::resource('buyers', 'Buyer\BuyerController')->only(['index', 'show']);
 
 /*
 |----------
@@ -37,25 +37,25 @@ Route::resource('categories', 'Category\CategoryController')->except(['create', 
 | Products
 |----------
 */
-Route::resource('buyer', 'Buyer\BuyerController')->only(['index', 'show']);
+Route::resource('products', 'Product\ProductController')->only(['index', 'show']);
 
 /*
 |----------
 | Sellers
 |----------
 */
-Route::resource('buyer', 'Buyer\BuyerController')->only(['index', 'show']);
+Route::resource('sellers', 'Seller\SellerController')->only(['index', 'show']);
 
 /*
 |----------
 | Transactions
 |----------
 */
-Route::resource('buyer', 'Buyer\BuyerController')->only(['index', 'show']);
+Route::resource('transactions', 'Transaction\TransactionController')->only(['index', 'show']);
 
 /*
 |----------
 | Users
 |----------
 */
-Route::resource('buyer', 'Buyer\BuyerController')->only(['index', 'show']);
+Route::resource('users', 'User\UserController')->except(['create', 'edit']);
