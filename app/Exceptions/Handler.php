@@ -5,8 +5,24 @@ namespace App\Exceptions;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
+// !Report Excepitions
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
+use Illuminate\Database\QueryException;
+use Illuminate\Auth\AuthenticationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+
+// Use helper trait
+use App\Traits\ApiResponser;
+
 class Handler extends ExceptionHandler
 {
+    use ApiResponser;
+
     /**
      * A list of the exception types that are not reported.
      *
@@ -50,6 +66,48 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        if($exception instanceof ValidationException) {
+            return  $this->convertValidationExceptionToResponse($exception, $request);
+        }
+
+        if($exception instanceof ModelNotFoundException) {
+            $modelName = class_basename($exception->getModel());
+            return  $this->errorResponse("Does not exist any {$modelName} with the specific identifier.", 404);
+        }
+
+        if($exception instanceof AuthenticationException) {
+            return $this->unauthenticated($request, $exception);
+        }
+
+        if($exception instanceof AuthorizationException) {
+            return $this->errorResponse($exception->getMessage(), 403);
+        }
+
+        if($exception instanceof NotFoundHttpException) {
+            return $this->errorResponse('This route cannot be found.', 404);
+        }
+
         return parent::render($request, $exception);
+    }
+
+    /*
+    |---------------------------------------
+    | Authentication exception To Json response.
+    |---------------------------------------
+    */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        return $request->errorResponse('Unauthenticate!!', 401);
+    }
+
+    /*
+    |---------------------------------------
+    | Validatation Error To Json Response
+    |---------------------------------------
+    */
+    public function convertValidationExceptionToResponse(ValidationException $e, $request)
+    {
+        $errors = $e->validator->errors()->getMessages();
+        return $this->errorResponse($errors, 422);
     }
 }
