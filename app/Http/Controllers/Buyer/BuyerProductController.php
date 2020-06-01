@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Buyer;
 
 use App\Buyer;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 
-class BuyerProductController extends Controller
+class BuyerProductController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -15,8 +15,9 @@ class BuyerProductController extends Controller
      */
     public function index(Buyer $buyer)
     {
-        $products = $buyer->transactions()->with('product')->get()->pluck('product');
-        // dd($products);
-        return $products;
+        $products = $buyer->transactions()->with('product')
+            ->get()
+            ->pluck('product');
+        return $this->showAll($products);
     }
 }
