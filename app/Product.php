@@ -7,8 +7,15 @@ use App\Category;
 use App\Seller;
 use App\Transaction;
 
+// Soft Deletes
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Product extends Model
 {
+    // use softdeletes
+    use SoftDeletes;
+    protected $dates = ['deleted_at'];
+
     const AVAILABLE_PRODUCT = 'available';
     const UNAVAILABLE_PRODUCT = 'unavailable';
 

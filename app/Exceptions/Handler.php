@@ -9,14 +9,14 @@ use Throwable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-
 use Illuminate\Database\QueryException;
 use Illuminate\Auth\AuthenticationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 
-// Use helper trait
+// Use Api Helper Trait
 use App\Traits\ApiResponser;
 
 class Handler extends ExceptionHandler
@@ -87,7 +87,29 @@ class Handler extends ExceptionHandler
             return $this->errorResponse('This route cannot be found.', 404);
         }
 
-        return parent::render($request, $exception);
+        if($exception instanceof MethodNotAllowedHttpException) {
+            return $this->errorResponse('Request method is Invalid.', 405);
+        }
+
+        if($exception instanceof HttpException) {
+            return $this->errorResponse($exception->getMessages(), $exception->getStatusCode());
+        }
+
+        if($exception instanceof QueryException) {
+            return $this->queryExceptionHandler($exception, $request);
+        }
+
+        // Debuging Mode to Unexpected Error
+        if(config('app.debug')) {
+            // Default Parent Render Method
+            return parent::render($request, $exception);
+        }
+
+        // Handling Unexpected Error
+        // Response Json
+        return $this->errorResponse(
+            'Unexpected Error Try Again Later.', 500
+        );
     }
 
     /*
@@ -109,5 +131,23 @@ class Handler extends ExceptionHandler
     {
         $errors = $e->validator->errors()->getMessages();
         return $this->errorResponse($errors, 422);
+    }
+
+    /*
+    |---------------------------------------
+    | Query Error To Json Response
+    |---------------------------------------
+    */
+    public function queryExceptionHandler(QueryException $exception, $request)
+    {
+        // There is code inside ErrorInfo Array Index 1
+        $errorCode = $exception->errorInfo[1];
+
+        if($errorCode == 1451) {
+            return $this->errorResponse('Cannot Remove permanently. It related another field.', 409);
+        }
+
+        $error = "Some query error Or Connectons";
+        return $this->errorResponse($error, 500);
     }
 }
