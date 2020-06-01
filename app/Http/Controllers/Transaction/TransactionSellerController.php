@@ -10,7 +10,7 @@ use App\Transaction;
 class TransactionSellerController extends ApiController
 {
     /**
-     * Display a listing of the resource.
+ * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
